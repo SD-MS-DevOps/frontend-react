@@ -1,0 +1,78 @@
+# This workflow is written specifically for Jam3/nextjs-boilerplate
+# It uploads all contents inside the ./out/ folder generated on build:prod:static process to an AWS S3 account
+
+name: Github Action S3 Deploy
+
+on:
+  workflow_call:
+    inputs:
+      CI_ENV:
+        required: true
+        type: string
+      CONTENTFUL_ENVIRONMENT:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_DEFAULT_REGION:
+        required: true
+      AWS_SESSION_TOKEN:
+        required: true
+      S3_ORIGIN_BUCKET:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 5
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Update NPM
+        run: npm install -g npm@8
+
+      - name: Clear Prepare Script
+        run: npm set-script prepare ""
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linters
+        run: npx nx lint catalog
+
+      - name: Build NX app
+        run: ./.github/scripts/build.sh
+        shell: bash
+        env:
+          CI_ENV: ${{ inputs.CI_ENV }}
+          CONTENTFUL_ENVIRONMENT: ${{ inputs.CONTENTFUL_ENVIRONMENT }}
+          S3_ORIGIN_BUCKET: ${{ secrets.S3_ORIGIN_BUCKET }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{secrets.AWS_DEFAULT_REGION}}
+
+      - name: S3 Deploy
+        run: ./.github/scripts/deploy.sh
+        shell: bash
+        env:
+          S3_ORIGIN_BUCKET: ${{ secrets.S3_ORIGIN_BUCKET }}

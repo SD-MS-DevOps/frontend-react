@@ -1,0 +1,27 @@
+name: Github Action Workflow DEV
+
+on:
+  push:
+    branches:
+      - develop
+  repository_dispatch:
+    types:
+      - build-dev
+  workflow_dispatch:
+
+concurrency:
+  group: environment-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-dev:
+    uses: SD-MS-DevOps/frontend-react/.github/workflows/deploy-to-s3.yml@develop
+    with:
+      CI_ENV: develop
+      CONTENTFUL_ENVIRONMENT: 'develop'
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+      AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN}}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      S3_ORIGIN_BUCKET: ${{ secrets.S3_ORIGIN_BUCKET_DEV }}
