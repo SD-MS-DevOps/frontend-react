@@ -33,30 +33,32 @@ jobs:
         node-version: [16.x]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
+        
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 6.32.9
 
       - name: Setup Node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '14'
           cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm test
 
-      - name: Install PNPM
-        run: npm install -g pnpm
+      #  uses: actions/setup-node@v2
+      #  with:
+      #    node-version: ${{ matrix.node-version }}
+      #    cache: 'pnpm'
 
-      - name: Add PNPM to PATH
-        run: echo "$(npm bin -g)" >> $GITHUB_PATH
+      #- name: Install PNPM
+       # run: npm install -g pnpm
 
-      - name: Verify PNPM installation
-        run: pnpm --version
-
-      - name: List global binaries
-        run: ls $(npm bin -g)
-
-      - name: Install dependencies
-        run: pnpm install
+     # - name: Install dependencies
+     #   run: pnpm install
          
       - name: Run Linters
         run: pnpm nx lint catalog
