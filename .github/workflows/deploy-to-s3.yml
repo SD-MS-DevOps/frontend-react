@@ -1,4 +1,4 @@
-# This workflow is written specifically for Jam3/nextjs-boilerplate
+# This workflow is written specifically for Jam3/nextjs-boilerplate.
 # It uploads all contents inside the ./out/ folder generated on build:prod:static process to an AWS S3 account
 
 name: Github Action S3 Deploy
