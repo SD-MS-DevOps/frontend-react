@@ -1,0 +1,38 @@
+name: Linters
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+      - develop
+      - staging
+      - main
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Update NPM
+        run: npm install -g npm@8
+
+      - name: Prepare
+        run: npm set-script prepare ""
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Linters
+        run: npm run linters-ci
