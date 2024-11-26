@@ -10,5 +10,3 @@ printenv
 rm -rf ./dist/apps/catalog
 
 npx nx build catalog --configuration=production
-
-mv dist/apps/catalog ./out
