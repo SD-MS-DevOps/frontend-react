@@ -1,0 +1,30 @@
+name: Workflow 
+on:
+  push:
+    branches:
+      - develop
+      - staging
+      - main
+
+jobs:
+
+  repository_dispatch:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get branch names
+        id: branch-names
+        uses: tj-actions/branch-names@v8
+     
+        # Verificar la rama   
+      - name: Get branch name
+        run: |
+          echo "${{ steps.branch-names.outputs.ref_branch }}"
+           
+      - uses: peter-evans/repository-dispatch@v3
+        with:
+           token: ${{ secrets.REPO_ACCESS_TOKEN }}
+           repository: SD-MS-DevOps/IaC-DevOps
+           event-type: frontend-react-${{ steps.branch-names.outputs.ref_branch }}
+           client-payload: '{"ref": "${{ steps.branch-names.outputs.ref_branch }}", "sha": "${{ github.sha }}", "repository": "${{ github.repository }}"}'
